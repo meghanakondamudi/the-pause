@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Pause</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2D5D7C;
+            --secondary: #5DA399;
+            --accent: #F4A261;
+            --light: #F8F9FA;
+            --dark: #343A40;
+            --ocean-dark: #1A4B6D;
+            --ocean-light: #5DA399;
+            --forest-dark: #2E5E4E;
+            --forest-light: #7CB094;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Lexend Deca', sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            transition: var(--transition);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body.ocean-theme {
+            --primary: var(--ocean-dark);
+            --secondary: var(--ocean-light);
+            background: linear-gradient(135deg, #E0F7FA 0%, #B2EBF2 50%, #80DEEA 100%);
+        }
+
+        body.forest-theme {
+            --primary: var(--forest-dark);
+            --secondary: var(--forest-light);
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 50%, #A5D6A7 100%);
+        }
+
+        .app-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--secondary);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            margin-right: 10px;
+            font-size: 32px;
+        }
+
+        .theme-toggle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .theme-btn {
+            background: none;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 5px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+
+        .theme-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .theme-btn i {
+            margin-right: 5px;
+        }
+
+        .main-nav {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--dark);
+            font-size: 16px;
+            font-weight: 600;
+            padding: 10px 15px;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .nav-btn:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 3px;
+            background-color: var(--accent);
+            transition: var(--transition);
+        }
+
+        .nav-btn.active {
+            color: var(--primary);
+        }
+
+        .nav-btn.active:after {
+            width: 100%;
+        }
+
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 10px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: var(--transition);
+            cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-title {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .card-desc {
+            color: var(--dark);
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 15px;
+        }
+
+        .card-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .card-btn i {
+            margin-right: 5px;
+        }
+
+        .card-btn:hover {
+            background-color: var(--secondary);
+        }
+
+        /* Meditation Player */
+        .player-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .player-title {
+            color: var(--primary);
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .player-btn {
+            background-color: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .player-btn:hover {
+            background-color: var(--secondary);
+            transform: scale(1.1);
+        }
+
+        .player-btn i {
+            font-size: 18px;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: #eee;
+            border-radius: 3px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--dark);
+            opacity: 0.7;
+        }
+
+        /* Breathing Exercise */
+        .breath-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .breath-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            transition: all 1.5s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .breath-text {
+            z-index: 2;
+        }
+
+        .breath-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background-color: var(--secondary);
+            transition: height 1.5s ease-in-out;
+        }
+
+        .breath-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .breath-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .timer-display {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        /* 5 Senses Exercise */
+        .senses-exercise {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .senses-step {
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .senses-step.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .senses-prompt {
+            font-size: 18px;
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .senses-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            transition: var(--transition);
+        }
+
+        .senses-input:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+
+        .senses-nav {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Games Section */
+        .game-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+            height: 150px;
+        }
+
+        .game-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .game-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .game-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            padding: 15px;
+            color: white;
+        }
+
+        .game-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .game-desc {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-nav {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .nav-btn {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+            
+            .breath-circle {
+                width: 150px;
+                height: 150px;
+            }
+        }
+
+        /* Icons */
+        .icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="ocean-theme">
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-spa"></i>
+                <span>Serene</span>
+            </div>
+            <div class="theme-toggle">
+                <button class="theme-btn ocean-btn active" data-theme="ocean">
+                    <i class="fas fa-water"></i> Ocean
+                </button>
+                <button class="theme-btn forest-btn" data-theme="forest">
+                    <i class="fas fa-tree"></i> Forest
+                </button>
+            </div>
+        </header>
+
+        <nav class="main-nav">
+            <button class="nav-btn active" data-section="meditation">
+                <i class="fas fa-headphones"></i> Meditation
+            </button>
+            <button class="nav-btn" data-section="breathing">
+                <i class="fas fa-wind"></i> Breathing
+            </button>
+            <button class="nav-btn" data-section="senses">
+                <i class="fas fa-hand-holding-heart"></i> 5 Senses
+            </button>
+            <button class="nav-btn" data-section="games">
+                <i class="fas fa-gamepad"></i> Games
+            </button>
+        </nav>
+
+        <main>
+            <!-- Meditation Section -->
+            <section class="content-section active" id="meditation-section">
+                <h2 class="section-title">
+                    <i class="fas fa-headphones"></i> Guided Meditations
+                </h2>
+                
+                <div class="player-container">
+                    <div class="player-header">
+                        <div class="player-title">Ocean Calm</div>
+                        <div class="player-controls">
+                            <button class="player-btn" id="prev-btn">
+                                <i class="fas fa-step-backward"></i>
+                            </button>
+                            <button class="player-btn" id="play-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button class="player-btn" id="next-btn">
+                                <i class="fas fa-step-forward"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="progress-container" id="progress-container">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                    <div class="time-info">
+                        <span id="current-time">0:00</span>
+                        <span id="duration">3:45</span>
+                    </div>
+                </div>
+                
+                <div class="card-grid">
+                    <div class="card">
+                        <h3 class="card-title">Morning Mindfulness</h3>
+                        <p class="card-desc">Start your day with clarity and purpose with this 10-minute morning meditation.</p>
+                        <button class="card-btn">
+                            <i class="fas fa-play"></i> Play
+                        </button>
+                    </div>
+                    <div class="card">
+                        <h3 class="card-title">Deep Relaxation</h3>
+                        <p class="card-desc">Release tension and find deep relaxation with this 15-minute guided session.</p>
+                        <button class="card-btn">
+                            <i class="fas fa-play"></i> Play
+                        </button>
+                    </div>
+                    <div class="card">
+                        <h3 class="card-title">Sleep Sounds</h3>
+                        <p class="card-desc">Gentle ocean waves to help you fall asleep faster and sleep more soundly.</p>
+                        <button class="card-btn">
+                            <i class="fas fa-play"></i> Play
+                        </button>
+                    </div>
+                    <div class="card">
+                        <h3 class="card-title">Anxiety Relief</h3>
+                        <p class="card-desc">A calming practice to soothe anxious thoughts and find your center.</p>
+                        <button class="card-btn">
+                            <i class="fas fa-play"></i> Play
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Breathing Section -->
+            <section class="content-section" id="breathing-section">
+                <h2 class="section-title">
+                    <i class="fas fa-wind"></i> Breathing Exercises
+                </h2>
+                
+                <div class="breath-container">
+                    <div class="breath-circle" id="breath-circle">
+                        <div class="breath-wave" id="breath-wave"></div>
+                        <div class="breath-text" id="breath-text">Breathe In</div>
+                    </div>
+                    
+                    <div class="timer-display" id="breath-timer">02:00</div>
+                    
+                    <div class="breath-controls">
+                        <button class="breath-btn" id="start-breath">Start</button>
+                        <button class="breath-btn" id="pause-breath">Pause</button>
+                        <button class="breath-btn" id="reset-breath">Reset</button>
+                    </div>
+                    
+                    <div class="card-grid">
+                        <div class="card">
+                            <h3 class="card-title">4-7-8 Breathing</h3>
+                            <p class="card-desc">Inhale for 4, hold for 7, exhale for 8. Great for relaxation.</p>
+                            <button class="card-btn breath-preset" data-in="4" data-hold="7" data-out="8">
+                                <i class="fas fa-play"></i> Start
+                            </button>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title">Box Breathing</h3>
+                            <p class="card-desc">4-4-4-4 pattern to improve focus and reduce stress.</p>
+                            <button class="card-btn breath-preset" data-in="4" data-hold="4" data-out="4" data-pause="4">
+                                <i class="fas fa-play"></i> Start
+                            </button>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title">Deep Calm</h3>
+                            <p class="card-desc">Slow 5-5 breathing to activate relaxation response.</p>
+                            <button class="card-btn breath-preset" data-in="5" data-hold="0" data-out="5">
+                                <i class="fas fa-play"></i> Start
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5 Senses Section -->
+            <section class="content-section" id="senses-section">
+                <h2 class="section-title">
+                    <i class="fas fa-hand-holding-heart"></i> 5 Senses Exercise
+                </h2>
+                
+                <div class="senses-exercise">
+                    <div class="senses-step active" data-step="1">
+                        <div class="senses-prompt">Name 5 things you can see around you</div>
+                        <input type="text" class="senses-input" placeholder="Type what you see...">
+                        <div class="senses-nav">
+                            <button class="card-btn senses-next">Next</button>
+                        </div>
+                    </div>
+                    
+                    <div class="senses-step" data-step="2">
+                        <div class="senses-prompt">Name 4 things you can touch or feel</div>
+                        <input type="text" class="senses-input" placeholder="Type what you feel...">
+                        <div class="senses-nav">
+                            <button class="card-btn senses-prev">Previous</button>
+                            <button class="card-btn senses-next">Next</button>
+                        </div>
+                    </div>
+                    
+                    <div class="senses-step" data-step="3">
+                        <div class="senses-prompt">Name 3 things you can hear right now</div>
+                        <input type="text" class="senses-input" placeholder="Type what you hear...">
+                        <div class="senses-nav">
+                            <button class="card-btn senses-prev">Previous</button>
+                            <button class="card-btn senses-next">Next</button>
+                        </div>
+                    </div>
+                    
+                    <div class="senses-step" data-step="4">
+                        <div class="senses-prompt">Name 2 things you can smell</div>
+                        <input type="text" class="senses-input" placeholder="Type what you smell...">
+                        <div class="senses-nav">
+                            <button class="card-btn senses-prev">Previous</button>
+                            <button class="card-btn senses-next">Next</button>
+                        </div>
+                    </div>
+                    
+                    <div class="senses-step" data-step="5">
+                        <div class="senses-prompt">Name 1 thing you can taste</div>
+                        <input type="text" class="senses-input" placeholder="Type what you taste...">
+                        <div class="senses-nav">
+                            <button class="card-btn senses-prev">Previous</button>
+                            <button class="card-btn senses-complete">Complete</button>
+                        </div>
+                    </div>
+                    
+                    <div class="senses-step" data-step="complete">
+                        <div class="senses-prompt">Exercise Complete!</div>
+                        <p style="margin-bottom: 15px;">Take a moment to notice how you feel after grounding yourself in the present moment.</p>
+                        <button class="card-btn senses-restart">Start Again</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Games Section -->
+            <section class="content-section" id="games-section">
+                <h2 class="section-title">
+                    <i class="fas fa-gamepad"></i> Relaxing Games
+                </h2>
+                
+                <div class="card-grid">
+                    <a href="https://playcanv.as/p/JtL2iqIH/" target="_blank" class="card game-card">
+                        <img src="https://playcanv.as/p/JtL2iqIH/cover.png" alt="Happy Glass">
+                        <div class="game-overlay">
+                            <div class="game-title">Happy Glass</div>
+                            <div class="game-desc">A relaxing puzzle game about filling a glass</div>
+                        </div>
+                    </a>
+                    
+                    <a href="https://playcanv.as/p/5yOc9gB3/" target="_blank" class="card game-card">
+                        <img src="https://playcanv.as/p/5yOc9gB3/cover.png" alt="Color Fold">
+                        <div class="game-overlay">
+                            <div class="game-title">Color Fold</div>
+                            <div class="game-desc">A meditative paper folding puzzle</div>
+                        </div>
+                    </a>
+                    
+                    <a href="https://playcanv.as/p/7V7qOaEx/" target="_blank" class="card game-card">
+                        <img src="https://playcanv.as/p/7V7qOaEx/cover.png" alt="Petal Garden">
+                        <div class="game-overlay">
+                            <div class="game-title">Petal Garden</div>
+                            <div class="game-desc">Grow a beautiful flower garden</div>
+                        </div>
+                    </a>
+                    
+                    <a href="https://playcanv.as/p/a5C9fohB/" target="_blank" class="card game-card">
+                        <img src="https://playcanv.as/p/a5C9fohB/cover.png" alt="Water Sort Puzzle">
+                        <div class="game-overlay">
+                            <div class="game-title">Water Sort</div>
+                            <div class="game-desc">A calming color sorting game</div>
+                        </div>
+                    </a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Theme Switching
+        const oceanBtn = document.querySelector('.ocean-btn');
+        const forestBtn = document.querySelector('.forest-btn');
+        const body = document.body;
+        
+        oceanBtn.addEventListener('click', () => {
+            body.classList.remove('forest-theme');
+            body.classList.add('ocean-theme');
+            oceanBtn.classList.add('active');
+            forestBtn.classList.remove('active');
+        });
+        
+        forestBtn.addEventListener('click', () => {
+            body.classList.remove('ocean-theme');
+            body.classList.add('forest-theme');
+            forestBtn.classList.add('active');
+            oceanBtn.classList.remove('active');
+        });
+        
+        // Navigation
+        const navBtns = document.querySelectorAll('.nav-btn');
+        const contentSections = document.querySelectorAll('.content-section');
+        
+        navBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const sectionId = btn.getAttribute('data-section') + '-section';
+                
+                navBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                contentSections.forEach(section => section.classList.remove('active'));
+                document.getElementById(sectionId).classList.add('active');
+            });
+        });
+        
+        // Meditation Player
+        const playBtn = document.getElementById('play-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const progressContainer = document.getElementById('progress-container');
+        let isPlaying = false;
+        
+        playBtn.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            playBtn.innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+            
+            if (isPlaying) {
+                simulateProgress();
+            }
+        });
+        
+        function simulateProgress() {
+            let progress = 0;
+            const duration = 225; // 3:45 in seconds
+            const interval = setInterval(() => {
+                if (!isPlaying) {
+                    clearInterval(interval);
+                    return;
+                }
+                
+                progress += 0.5;
+                const progressPercent = (progress / duration) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+                
+                // Update time display
+                const currentTime = formatTime(progress);
+                document.getElementById('current-time').textContent = currentTime;
+                
+                if (progress >= duration) {
+                    clearInterval(interval);
+                    isPlaying = false;
+                    playBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    progressBar.style.width = '0%';
+                    document.getElementById('current-time').textContent = '0:00';
+                }
+            }, 500);
+        }
+        
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+        
+        progressContainer.addEventListener('click', (e) => {
+            if (!isPlaying) return;
+            
+            const width = progressContainer.clientWidth;
+            const clickX = e.offsetX;
+            const duration = 225;
+            const newTime = (clickX / width) * duration;
+            
+            progressBar.style.width = `${(newTime / duration) * 100}%`;
+            document.getElementById('current-time').textContent = formatTime(newTime);
+        });
+        
+        // Breathing Exercise
+        const breathCircle = document.getElementById('breath-circle');
+        const breathWave = document.getElementById('breath-wave');
+        const breathText = document.getElementById('breath-text');
+        const startBtn = document.getElementById('start-breath');
+        const pauseBtn = document.getElementById('pause-breath');
+        const resetBtn = document.getElementById('reset-breath');
+        const timerDisplay = document.getElementById('breath-timer');
+        const breathPresets = document.querySelectorAll('.breath-preset');
+        
+        let breathInterval;
+        let breathPhase = 'in';
+        let breathTime = 120; // 2 minutes in seconds
+        let isBreathing = false;
+        let inhaleTime = 4;
+        let holdTime = 7;
+        let exhaleTime = 8;
+        let pauseTime = 0;
+        let currentCount = 0;
+        
+        breathPresets.forEach(preset => {
+            preset.addEventListener('click', () => {
+                inhaleTime = parseInt(preset.getAttribute('data-in'));
+                holdTime = parseInt(preset.getAttribute('data-hold'));
+                exhaleTime = parseInt(preset.getAttribute('data-out'));
+                pauseTime = preset.getAttribute('data-pause') ? parseInt(preset.getAttribute('data-pause')) : 0;
+                
+                resetBreath();
+            });
+        });
+        
+        startBtn.addEventListener('click', startBreath);
+        pauseBtn.addEventListener('click', pauseBreath);
+        resetBtn.addEventListener('click', resetBreath);
+        
+        function startBreath() {
+            if (isBreathing) return;
+            
+            isBreathing = true;
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            
+            breathInterval = setInterval(updateBreath, 1000);
+            updateBreath();
+        }
+        
+        function pauseBreath() {
+            isBreathing = false;
+            clearInterval(breathInterval);
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+        }
+        
+        function resetBreath() {
+            pauseBreath();
+            breathTime = 120;
+            breathPhase = 'in';
+            currentCount = 0;
+            breathWave.style.height = '0%';
+            breathText.textContent = 'Breathe In';
+            timerDisplay.textContent = '02:00';
+        }
+        
+        function updateBreath() {
+            if (breathTime <= 0) {
+                resetBreath();
+                return;
+            }
+            
+            breathTime--;
+            timerDisplay.textContent = formatTime(breathTime);
+            
+            currentCount++;
+            
+            if (breathPhase === 'in' && currentCount > inhaleTime) {
+                breathPhase = 'hold';
+                currentCount = 0;
+                breathText.textContent = 'Hold';
+            } else if (breathPhase === 'hold' && currentCount > holdTime) {
+                breathPhase = 'out';
+                currentCount = 0;
+                breathText.textContent = 'Breathe Out';
+            } else if (breathPhase === 'out' && currentCount > exhaleTime) {
+                breathPhase = 'pause';
+                currentCount = 0;
+                breathText.textContent = 'Pause';
+            } else if (breathPhase === 'pause' && currentCount > pauseTime) {
+                breathPhase = 'in';
+                currentCount = 0;
+                breathText.textContent = 'Breathe In';
+            }
+            
+            // Update wave animation
+            if (breathPhase === 'in') {
+                const percent = (currentCount / inhaleTime) * 100;
+                breathWave.style.height = `${percent}%`;
+            } else if (breathPhase === 'out') {
+                const percent = 100 - (currentCount / exhaleTime) * 100;
+                breathWave.style.height = `${percent}%`;
+            }
+        }
+        
+        // 5 Senses Exercise
+        const sensesSteps = document.querySelectorAll('.senses-step');
+        const sensesNextBtns = document.querySelectorAll('.senses-next');
+        const sensesPrevBtns = document.querySelectorAll('.senses-prev');
+        const sensesCompleteBtn = document.querySelector('.senses-complete');
+        const sensesRestartBtn = document.querySelector('.senses-restart');
+        
+        sensesNextBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const currentStep = btn.closest('.senses-step');
+                const nextStepNum = parseInt(currentStep.getAttribute('data-step')) + 1;
+                showStep(nextStepNum);
+            });
+        });
+        
+        sensesPrevBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const currentStep = btn.closest('.senses-step');
+                const prevStepNum = parseInt(currentStep.getAttribute('data-step')) - 1;
+                showStep(prevStepNum);
+            });
+        });
+        
+        sensesCompleteBtn.addEventListener('click', () => {
+            showStep('complete');
+        });
+        
+        sensesRestartBtn.addEventListener('click', () => {
+            showStep(1);
+            document.querySelectorAll('.senses-input').forEach(input => {
+                input.value = '';
+            });
+        });
+        
+        function showStep(stepNum) {
+            sensesSteps.forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            if (stepNum === 'complete') {
+                document.querySelector('.senses-step[data-step="complete"]').classList.add('active');
+            } else {
+                document.querySelector(`.senses-step[data-step="${stepNum}"]`).classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
